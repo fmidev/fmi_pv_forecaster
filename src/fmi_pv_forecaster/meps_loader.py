@@ -170,7 +170,9 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
     # index shift added since index is used as the time input of PVlib functions and using index is much easier
     # than using a separate time column
     df["time"] = df.index.copy() # time backup
+    # timeshift has to be here
     df.index = df.index + dt.timedelta(minutes=-30)
+
 
     # Calculate instant from accumulated values (only radiation parameters)
     diff = df.diff()
@@ -208,19 +210,14 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
     df.columns = ["dni", "dhi", "ghi", "dir_hi", "albedo", "T", "wind", "cloud_cover"]
 
 
-    # timeshifting used to be here, but that was wrong. Leaving this bit here as a reminder
-    #df.insert(loc=0, column="time", value=df.index)
-    # shifting timestamps to time-interval centers as timestamp for 12:00 refers to average during 11:00-12:00
-    # adding utc timezone marker to time
-    #df["time"] = df["time"].dt.tz_localize("UTC")
-
     # restricting values to zero
     clip_columns = ["dni", "dhi", "ghi"]
     df[clip_columns] = df[clip_columns].clip(lower=0.0)
     df.replace(-0.0, 0.0, inplace=True)
 
-
-
+    # timeshift should not be done here, leaving as a comment for debugging reasons as this seems to cause all kinds
+    # of odd symptoms in the PV model pipeline
+    # df.index = df.index + dt.timedelta(minutes=-30)
 
 
     if cache_enabled:
