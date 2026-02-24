@@ -16,3 +16,9 @@ jobs:
 
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
+
+
+      # checking obvious coding errors with flake 8
+    - name: flake8 linting prpcess
+      run: flake8 --count --select=E1,E9 --show-source --statistics ./src/fmi_pv_forecaster/*.py
+
