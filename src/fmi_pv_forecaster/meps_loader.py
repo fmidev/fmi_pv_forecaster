@@ -134,10 +134,10 @@ def collect_fmi_opendata(latitude: float, longitude: float,
     if len(data) == 0:
         raise Exception("FMI open data did not return a forecast with valid values. Check that geolocation is within "
                         "harmonie-arome model area shown in https://en.ilmatieteenlaitos.fi/weather-forecast-models "
-                        "and that requested time interval contains hours between now(" +
-                        str(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")) + ") and "
-                                                                                     "forecast interval end " +
-                        str((datetime.now(timezone.utc) + timedelta(hours=66)).strftime("%Y-%m-%d %H:%M")))
+                        "and that requested time interval contains hours between now("
+                        + str(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")) + ") and "
+                        "forecast interval end "
+                        + str((datetime.now(timezone.utc) + timedelta(hours=66)).strftime("%Y-%m-%d %H:%M")))
 
     # print("Got " + str(len(data))+ " values as forecast.")
 
@@ -234,9 +234,6 @@ def __get_irradiance_pvlib(latitude, longitude, date_start: datetime, date_end: 
 
     # measurement frequency, for example "15min" or "60min"
     measurement_frequency = str(data_resolution) + "min"
-
-    # measurement count, 1440 minutes per day
-    measurement_count = 1440 / data_resolution
 
     times = pd.date_range(start=date_start,
                           end=date_end,  # year + day for which the irradiance is calculated

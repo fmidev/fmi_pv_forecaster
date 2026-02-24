@@ -182,6 +182,7 @@ def set_cache(cache_on):
     Having cache on will only make new server calls if data isn't cached yet, caching was done
     over a minute ago, geolocation was changed or cache was manually purged.
     """
+
     meps_loader.cache_enabled = cache_on
 
 
@@ -465,7 +466,7 @@ def get_default_clearsky_estimate():
     return data
 
 
-### Custom hour/day functions from this moment to the future.
+# Custom hour/day functions below this line
 
 def get_fmi_forecast_today():
     time_start = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
@@ -520,15 +521,15 @@ def __interpolate_nearest_power_to_time_value(power_df, time_value):
     timestamp2 = None
 
     if minute < 30:
-        timestamp1 = (datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30) -
-                      datetime.timedelta(minutes=60))
+        timestamp1 = (datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30)
+                      - datetime.timedelta(minutes=60))
         timestamp2 = datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30)
 
     elif minute >= 30:
         timestamp1 = datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour,
                                        30)
-        timestamp2 = (datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30) +
-                      datetime.timedelta(minutes=60))
+        timestamp2 = (datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30)
+                      + datetime.timedelta(minutes=60))
 
     # distances between given time value and surrounding values
 

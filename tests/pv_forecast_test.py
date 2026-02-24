@@ -156,6 +156,7 @@ def test_forecast_power1():
 
     powerdata = pv_forecast.get_fmi_forecast_for_interval(time_start, time_end)
     # print("printing full result")
+    print(powerdata.head())
     # print_full(powerdata)
 
     print("====================================================")
@@ -233,7 +234,7 @@ def disabled_test_outside_area_getter():
     print("====================================================")
 
 
-## Testing alternative forecast functions
+# Testing alternative forecast functions
 
 
 def test_default_fmi_forecast():
@@ -448,8 +449,8 @@ def test_setting_of_timestep():
         timedelta_minutes = timedelta.seconds // 60
 
         assert timedelta_minutes == timestep, (
-                    "Error with setting timesteps. Timestep should have been " + str(timestep)
-                    + " but delta between rows in forecast was " + str(timedelta))
+            "Error with setting timesteps. Timestep should have been " + str(timestep)
+            + " but delta between rows in forecast was " + str(timedelta))
 
     print("Timedelta between rows was " + str(timedelta_minutes))
     print("The set timestep was: " + str(timestep))
@@ -488,8 +489,8 @@ def test_setting_of_time_offset():
         timedelta_minutes = timedelta.seconds // 60
 
         assert timedelta_minutes == timestep, (
-                    "Error with setting timesteps and time offsets. Timestep should have been " + str(timestep)
-                    + " but delta between rows in forecast was " + str(timedelta))
+            "Error with setting timesteps and time offsets. Timestep should have been " + str(timestep)
+            + " but delta between rows in forecast was " + str(timedelta))
 
     print("Timedelta between rows was " + str(timedelta_minutes))
     print("The set timestep was: " + str(timestep))
