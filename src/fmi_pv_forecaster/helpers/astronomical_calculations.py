@@ -24,11 +24,12 @@ Author: TimoSalola (Timo Salola).
 """
 
 from datetime import datetime
+
 import pvlib.atmosphere
 from pvlib import location, irradiance
 
 
-def get_solar_angle_of_incidence_fast(dt:datetime, latitude, longitude, tilt, azimuth)-> float:
+def get_solar_angle_of_incidence_fast(dt: datetime, latitude, longitude, tilt, azimuth) -> float:
     """
     Estimates solar angle of incidence at given datetime. Other parameters, tilt, azimuth and geolocation are read from
     config.py.
@@ -37,7 +38,6 @@ def get_solar_angle_of_incidence_fast(dt:datetime, latitude, longitude, tilt, az
 
     Optimized version, should work well
     """
-
 
     solar_azimuth, solar_apparent_zenith = get_solar_azimuth_zenith_fast(dt, latitude, longitude)
     panel_tilt = tilt
@@ -48,13 +48,12 @@ def get_solar_angle_of_incidence_fast(dt:datetime, latitude, longitude, tilt, az
 
     # restricting AOI values as projection functions do not expect AOI higher than 90. Should never be lower than 0 but
     # setting a limit anyways
-    angle_of_incidence = angle_of_incidence.clip(lower = 0, upper = 90)
+    angle_of_incidence = angle_of_incidence.clip(lower=0, upper=90)
 
     return angle_of_incidence
 
 
-
-def get_air_mass_fast(time: datetime, latitude, longitude)-> float:
+def get_air_mass_fast(time: datetime, latitude, longitude) -> float:
     """
     Generates value for air mass using pvlib default model(kastenyoung1989).
     This value tells us the relative thickness of atmosphere between sun and the PV panels.
@@ -66,8 +65,7 @@ def get_air_mass_fast(time: datetime, latitude, longitude)-> float:
     return air_mass
 
 
-
-def get_solar_azimuth_zenith_fast(dt: datetime, latitude, longitude)-> (float, float):
+def get_solar_azimuth_zenith_fast(dt: datetime, latitude, longitude) -> (float, float):
     """
     Returns apparent solar zenith and solar azimuth angles in degrees.
     :param dt: time to compute the solar position for.

@@ -1,6 +1,6 @@
 name: Test set 1
 
-on: [push]
+on: [ push ]
 
 jobs:
   flake8-lint:

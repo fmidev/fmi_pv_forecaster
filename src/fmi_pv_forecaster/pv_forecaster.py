@@ -7,9 +7,8 @@ import pytz
 import fmi_pv_forecaster.helpers.default_parameters
 from fmi_pv_forecaster import meps_loader
 from fmi_pv_forecaster.helpers import irradiance_transpositions, output_estimator
-from fmi_pv_forecaster.helpers import reflection_estimator
 from fmi_pv_forecaster.helpers import panel_temperature_estimator
-
+from fmi_pv_forecaster.helpers import reflection_estimator
 
 # These variables must be set before pv forecast is called
 site_latitude = None
@@ -18,22 +17,20 @@ panel_tilt = None
 panel_azimuth = None
 
 # These variables can be changed if desired
-extended_output = False # set to true and the radiation parameters and intermediate steps of the pv output calculation
+extended_output = False  # set to true and the radiation parameters and intermediate steps of the pv output calculation
 # will be included in the output
 
-power_rating = 1 # power in kw
+power_rating = 1  # power in kw
 
 timezone = "UTC"
 
 
-
 def print_info():
-    print("System location(WGS84): " + str(site_latitude) + ", " + str(site_longitude)+".")
+    print("System location(WGS84): " + str(site_latitude) + ", " + str(site_longitude) + ".")
     print("Panel angles: " + str(panel_tilt) + ", " + str(panel_azimuth) + ".")
     print("System power: " + str(power_rating))
     print("Timezone: " + str(timezone))
     print("Extended output: " + str(extended_output))
-
 
 
 def print_full(x: pandas.DataFrame):
@@ -54,10 +51,10 @@ def print_full(x: pandas.DataFrame):
     pd.reset_option('display.max_colwidth')
 
 
-
 """
 Parameter setting functions begin here, some mandatory, some optional.
 """
+
 
 def set_location(latitude, longitude):
     """
@@ -77,7 +74,8 @@ def set_location(latitude, longitude):
 
     site_latitude = latitude
     site_longitude = longitude
-    #print("Geolocation set at: " + str(site_latitude) + "°, " + str(site_longitude)+"°")
+    # print("Geolocation set at: " + str(site_latitude) + "°, " + str(site_longitude)+"°")
+
 
 def force_clear_fmi_cache():
     """
@@ -87,6 +85,7 @@ def force_clear_fmi_cache():
     """
 
     meps_loader.clear_cache()
+
 
 def set_angles(p_tilt, p_azimuth):
     """
@@ -100,7 +99,7 @@ def set_angles(p_tilt, p_azimuth):
 
     panel_tilt = p_tilt
     panel_azimuth = p_azimuth
-    #print("Panel angles set at tilt: " + str(panel_tilt)+ "°  Azimuth: " + str(panel_azimuth)+"°")
+    # print("Panel angles set at tilt: " + str(panel_tilt)+ "°  Azimuth: " + str(panel_azimuth)+"°")
 
 
 def set_extended_output(extended: bool):
@@ -112,6 +111,7 @@ def set_extended_output(extended: bool):
     """
     global extended_output
     extended_output = extended
+
 
 def set_nominal_power_kw(nominal_power: float):
     """
@@ -132,8 +132,9 @@ def set_default_air_temp(air_temp_c: float):
     Air temperature influences panel temperature which in turn changes panel efficiency.
     """
     fmi_pv_forecaster.helpers.default_parameters.air_temperature = air_temp_c
-    #print("Air temperature for clearsky simulations set at: " +
+    # print("Air temperature for clearsky simulations set at: " +
     # str(fmi_pv_forecast.helpers.default_parameters.air_temperature)+ "°C")
+
 
 def set_default_wind_speed(wind_speed_ms: float):
     """
@@ -142,8 +143,9 @@ def set_default_wind_speed(wind_speed_ms: float):
     Wind transfers heat away from PV panels and decreases the difference between air temperature and panel temperature.
     """
     fmi_pv_forecaster.helpers.default_parameters.wind_speed = wind_speed_ms
-    #print("Wind speed for clearsky simulations set at: " +
+    # print("Wind speed for clearsky simulations set at: " +
     # str(fmi_pv_forecast.helpers.default_parameters.wind_speed)+ "ms")
+
 
 def set_module_elevation(module_elevation_m: float):
     """
@@ -158,7 +160,7 @@ def set_module_elevation(module_elevation_m: float):
     """
 
     fmi_pv_forecaster.helpers.default_parameters.panel_elevation = module_elevation_m
-    #print("Module elevation set at: " + str(fmi_pv_forecast.helpers.default_parameters.panel_elevation) + "m")
+    # print("Module elevation set at: " + str(fmi_pv_forecast.helpers.default_parameters.panel_elevation) + "m")
 
 
 def set_default_albedo(albedo: float):
@@ -168,7 +170,6 @@ def set_default_albedo(albedo: float):
     """
 
     fmi_pv_forecaster.helpers.default_parameters.albedo = albedo
-
 
 
 def set_cache(cache_on):
@@ -185,22 +186,22 @@ def set_cache(cache_on):
 
 
 def set_timezone(timezone_string):
-
-
     global timezone
 
     all_viable_timezones = pytz.all_timezones_set
 
     if timezone_string not in all_viable_timezones:
         raise ValueError("Given timezone \"" + str(timezone_string) + "\" is not in pytz.all_timezones. Timezone should"
-            " be similar to \"Europe/Helsinki\", List of valid timezones can be found at "
-            "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
+                                                                      " be similar to \"Europe/Helsinki\", List of valid timezones can be found at "
+                                                                      "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
 
     timezone = timezone_string
 
 
 def get_timezone():
     return timezone
+
+
 """
 Parameter setting functions end here.
 Internal helper functions begin here. These are not exposed outside the package
@@ -208,7 +209,6 @@ Internal helper functions begin here. These are not exposed outside the package
 
 
 def __get_clearsky_radiation_for_interval(interval_start, interval_end, timestep):
-
     """
     Helper function, this will return a dataframe with clearsky radiation values dni, dhi and ghi
     """
@@ -225,8 +225,8 @@ def __get_clearsky_radiation_for_interval(interval_start, interval_end, timestep
 
     return clearsky_estimate
 
-def __get_fmi_forecast_for_interval(interval_start, interval_end):
 
+def __get_fmi_forecast_for_interval(interval_start, interval_end):
     """
     Main function for getting FMI open data -radiation values.
     :param interval_start:
@@ -245,14 +245,12 @@ def __get_fmi_forecast_for_interval(interval_start, interval_end):
     return data
 
 
-
-
-
 """
 Internal helper functions  end here.
 ! Public functions begin
 Starting with radiation table processing.
 """
+
 
 def process_radiation_df(data):
     """
@@ -270,8 +268,8 @@ def process_radiation_df(data):
         # If using pvlib clearsky data, there will not be a cloud cover column. Added here for compatibility.
         data["cloud_cover"] = 0
 
-    #print(data)
-    #print(data.columns)
+    # print(data)
+    # print(data.columns)
 
     # step 2. project irradiance components to plane of array:
     data = irradiance_transpositions.irradiance_df_to_poa_df(data, site_latitude, site_longitude, panel_tilt,
@@ -301,8 +299,8 @@ def process_radiation_df(data):
 Flexible forecast functions with custom intervals:
 """
 
-def get_clearsky_estimate_for_interval(interval_start, interval_end, timestep=60):
 
+def get_clearsky_estimate_for_interval(interval_start, interval_end, timestep=60):
     if site_latitude is None or site_longitude is None:
         raise ValueError(
             "Latitude and longitude must be defined before PV output is estimated."
@@ -317,12 +315,12 @@ def get_clearsky_estimate_for_interval(interval_start, interval_end, timestep=60
             " valid 0-90, 0-360 degree panel angles."
         )
 
-
     # timeshifting
     # this cannot be used as setting a minute is not possible, this kills time offset function
     offset = fmi_pv_forecaster.helpers.default_parameters.clearsky_fc_time_offset
 
-    interval_start = datetime.datetime(year=interval_start.year, month=interval_start.month, day=interval_start.day, hour=interval_start.hour, minute=offset)
+    interval_start = datetime.datetime(year=interval_start.year, month=interval_start.month, day=interval_start.day,
+                                       hour=interval_start.hour, minute=offset)
 
     # step 1. getting clearsky radiation
     data = __get_clearsky_radiation_for_interval(interval_start, interval_end, timestep)
@@ -344,12 +342,13 @@ def get_fmi_forecast_for_interval(interval_start, interval_end):
     :return:
     """
     default_fmi_forecast = get_default_fmi_forecast()
-    return  default_fmi_forecast.loc[interval_start:interval_end]
+    return default_fmi_forecast.loc[interval_start:interval_end]
 
 
 """
 Fixed interval forecast functions begin here
 """
+
 
 def __get_fmi_forecast_rad_data():
     """
@@ -377,10 +376,10 @@ def __get_fmi_forecast_rad_data():
             " valid 0-90, 0-360 degree panel angles."
         )
 
-
     data = __get_fmi_forecast_for_interval(interval_start, interval_end)
 
     return data
+
 
 def get_default_fmi_forecast(interpolate=False):
     """
@@ -406,7 +405,6 @@ def get_default_fmi_forecast(interpolate=False):
         # Note, this function supports other interpolation methods. Got a bunch of errors with them, but in theory
         # some interpolation functions could result in nicer output.
 
-
     # processing data with our pv model
     data = process_radiation_df(data)
 
@@ -429,6 +427,7 @@ def set_clearsky_fc_timestep(new_timestep):
     :param new_timestep: Timestep in minutes.
     """
     fmi_pv_forecaster.helpers.default_parameters.clearsky_fc_timestep = new_timestep
+
 
 def set_clearsky_fc_time_offset(new_offset):
     """
@@ -454,7 +453,7 @@ def get_default_clearsky_estimate():
     xx is current hour.
     """
 
-    time_start = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)- datetime.timedelta(hours=3)
+    time_start = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) - datetime.timedelta(hours=3)
     time_start = datetime.datetime(time_start.year, time_start.month, time_start.day, time_start.hour)
     time_end = time_start + datetime.timedelta(hours=68)
 
@@ -469,13 +468,12 @@ def get_default_clearsky_estimate():
 ### Custom hour/day functions from this moment to the future.
 
 def get_fmi_forecast_today():
-
-
     time_start = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     time_end = datetime.datetime(time_start.year, time_start.month, time_start.day, 23)
     data = get_fmi_forecast_for_interval(time_start, time_end)
 
     return data
+
 
 def get_fmi_forecast_now():
     """
@@ -487,8 +485,8 @@ def get_fmi_forecast_now():
     time_now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     return __interpolate_nearest_power_to_time_value(fmi_power_forecast, time_now)
 
-def get_fmi_forecast_at_interpolated_time(given_time):
 
+def get_fmi_forecast_at_interpolated_time(given_time):
     fmi_power_forecast = get_default_fmi_forecast()
     return __interpolate_nearest_power_to_time_value(fmi_power_forecast, given_time)
 
@@ -524,7 +522,7 @@ def __interpolate_nearest_power_to_time_value(power_df, time_value):
     if minute < 30:
         timestamp1 = (datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30) -
                       datetime.timedelta(minutes=60))
-        timestamp2 = datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour,30)
+        timestamp2 = datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour, 30)
 
     elif minute >= 30:
         timestamp1 = datetime.datetime(time_value.year, time_value.month, time_value.day, time_value.hour,
@@ -537,11 +535,11 @@ def __interpolate_nearest_power_to_time_value(power_df, time_value):
     if timestamp1 not in power_df.index or timestamp2 not in power_df.index:
         return None
 
-    #print("timevalue:" + str(time_value))
-    #print("timestamp1:" + str(timestamp1))
-    #print("timestamp2:" + str(timestamp2))
-    time_from1 = time_value - timestamp1 # a = X_pos - A_pos
-    time_from2 = timestamp2-time_value # b = B_pos- X_pos
+    # print("timevalue:" + str(time_value))
+    # print("timestamp1:" + str(timestamp1))
+    # print("timestamp2:" + str(timestamp2))
+    time_from1 = time_value - timestamp1  # a = X_pos - A_pos
+    time_from2 = timestamp2 - time_value  # b = B_pos- X_pos
     total_time = time_from1 + time_from2  # C = a+b
 
     # A                         B
@@ -554,24 +552,22 @@ def __interpolate_nearest_power_to_time_value(power_df, time_value):
     # a = 0.1, b = 0.9
     # X = A*(0.9) + B*(0.1)
 
-
     # multipliers, fractional inverses, (1-a/c)
-    fractional_distance_from1 = 1-time_from1/total_time # 1-a/C
-    fractional_distance_from2 = 1-time_from2/total_time # 1-b/C
+    fractional_distance_from1 = 1 - time_from1 / total_time  # 1-a/C
+    fractional_distance_from2 = 1 - time_from2 / total_time  # 1-b/C
 
     # rows between which to interpolate
     row1 = power_df.loc[str(timestamp1)].copy()
     row2 = power_df.loc[str(timestamp2)].copy()
 
     # interpolated row
-    interpolated_row = row1*fractional_distance_from1 + row2*fractional_distance_from2
+    interpolated_row = row1 * fractional_distance_from1 + row2 * fractional_distance_from2
 
     # returning interpolated value
     return interpolated_row
 
 
 def add_local_time_column(df):
-
     """
     This function adds a column "local_time" to given dataframe. Local time is calculated based on timezone given with
     set_timezone() and the index of the dataframe which should be naive or timezone aware UTC timestamp.
@@ -584,7 +580,7 @@ def add_local_time_column(df):
     # extracting index, index can be timezone aware or naive
     idx = df.index
 
-    if idx.tz is None: # handling aware and naive situations with separate functions
+    if idx.tz is None:  # handling aware and naive situations with separate functions
         idx = idx.tz_localize("UTC")
     else:
         idx = idx.tz_convert("UTC")

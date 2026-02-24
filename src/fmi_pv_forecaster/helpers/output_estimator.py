@@ -7,13 +7,14 @@ These columns are named "poa_ref_cor"(plane of array irradiance with reflection 
 Author: TimoSalola (Timo Salola).
 """
 
-
+import numpy
 import pandas
 import pandas as pd
-import numpy
+
 from . import default_parameters
 
 rated_power = 1
+
 
 def print_full(x: pandas.DataFrame):
     """
@@ -32,7 +33,8 @@ def print_full(x: pandas.DataFrame):
     pd.reset_option('display.float_format')
     pd.reset_option('display.max_colwidth')
 
-def add_output_to_df(df: pandas.DataFrame)-> pandas.DataFrame:
+
+def add_output_to_df(df: pandas.DataFrame) -> pandas.DataFrame:
     """
     Checker function for testing if required parameters exist in DF, if they do, add output to DF.
     :param df: Pandas dataframe with required columns for absorbed irradiance and panel temperature.
@@ -41,15 +43,12 @@ def add_output_to_df(df: pandas.DataFrame)-> pandas.DataFrame:
 
     # new PV output models can be added here if needed.
 
-
-
     if "poa_ref_cor" not in df.columns:
         raise ValueError("Column poa_ref_cor not found in dataframe, output can not be simulated.")
     if "module_temp" not in df.columns:
-        #print("module temperature variable \"module_temp\" not found in dataframe.
+        # print("module temperature variable \"module_temp\" not found in dataframe.
         # Using value from default_parameters: " + str(default_parameters.air_temperature) +"C")
         df["module_temp"] = default_parameters.air_temperature
-
 
     # filtering negative values out
     df.loc[df['poa_ref_cor'] < 0, 'poa_ref_cor'] = 0
@@ -58,7 +57,7 @@ def add_output_to_df(df: pandas.DataFrame)-> pandas.DataFrame:
     # this low, the system would not produce any power and values of 0.0 cause issues as the output model contains
     # logarithms
     df['output'] = df.apply(lambda row: 0.0 if row['poa_ref_cor'] < 0.1 else
-        __estimate_output(row['poa_ref_cor'], row['module_temp']), axis=1)
+    __estimate_output(row['poa_ref_cor'], row['module_temp']), axis=1)
 
     # filling nans
     df['output'] = df['output'].fillna(0.0)
@@ -66,8 +65,7 @@ def add_output_to_df(df: pandas.DataFrame)-> pandas.DataFrame:
     return df
 
 
-def __estimate_output(absorbed_radiation: float, panel_temp: float)-> float:
-
+def __estimate_output(absorbed_radiation: float, panel_temp: float) -> float:
     """
     Huld 2010 model
     T.~Huld, R.~Gottschalg, H.~G. Beyer, and M.~Topič,
@@ -114,8 +112,7 @@ def __estimate_output(absorbed_radiation: float, panel_temp: float)-> float:
     # + Tdiff*(k3+k4*ln(nrad) + k5*ln(nrad)²)
     # + k6*Tdiff²
 
-    #print(absorbed_radiation)
-
+    # print(absorbed_radiation)
 
     nrad = absorbed_radiation / 1000.0
     Tdiff = panel_temp - 25
@@ -123,21 +120,18 @@ def __estimate_output(absorbed_radiation: float, panel_temp: float)-> float:
     base = 1
 
     part_k1 = k1 * numpy.log(nrad)
-    part_k2 = k2 * (numpy.log(nrad)**2)
-    part_k3k4k5 = Tdiff*(k3+k4*numpy.log(nrad) + k5*(numpy.log(nrad)**2))
+    part_k2 = k2 * (numpy.log(nrad) ** 2)
+    part_k3k4k5 = Tdiff * (k3 + k4 * numpy.log(nrad) + k5 * (numpy.log(nrad) ** 2))
     # T*(-0.004681+0.000148*log(x) + 0.000169*log(x)²)
-    part_k6 = k6 * (Tdiff**2)
+    part_k6 = k6 * (Tdiff ** 2)
 
-    efficiency = base + part_k1+ part_k2 + part_k3k4k5 + part_k6
+    efficiency = base + part_k1 + part_k2 + part_k3k4k5 + part_k6
     efficiency = numpy.maximum(efficiency, min_efficiency)
     # huld efficiencies can be negative, fixing that here
 
-    #print(absorbed_radiation)
-    #print("efficiency:" + str(efficiency))
+    # print(absorbed_radiation)
+    # print("efficiency:" + str(efficiency))
 
-    output = rated_p*nrad*efficiency
-
-
+    output = rated_p * nrad * efficiency
 
     return output
-

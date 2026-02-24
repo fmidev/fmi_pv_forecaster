@@ -13,14 +13,14 @@ Modifications by: TimoSalola (Timo Salola).
 """
 import datetime as dt
 from datetime import datetime
-import pandas
-import pandas as pd
-import numpy as np
-from fmiopendata.wfs import download_stored_query
-from pvlib import location
 from datetime import timedelta
 from datetime import timezone
 
+import numpy as np
+import pandas
+import pandas as pd
+from fmiopendata.wfs import download_stored_query
+from pvlib import location
 
 cache_enabled = True
 last_load_time = None
@@ -68,7 +68,8 @@ def get_solar_azimuth_zenit_fast(sim_dt: datetime, latitude, longitude):
     return solar_azimuth, solar_apparent_zenith
 
 
-def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, end_time:datetime)-> pandas.DataFrame:
+def collect_fmi_opendata(latitude: float, longitude: float,
+                         start_time: datetime, end_time: datetime) -> pandas.DataFrame:
     """
     :param latitude:  wgs84 latitude of the pv system
     :param longitude: wgs84 longitude of the pv system
@@ -83,23 +84,22 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
 
     time_now = datetime.now()
 
-    #print("checking caching")
+    # print("checking caching")
 
     if cache_enabled:
         if last_load_time is None and cached_data is None:
-            #print("Cache enabled but no data in cache. Loading data as normal and saving data to cache.")
+            # print("Cache enabled but no data in cache. Loading data as normal and saving data to cache.")
             pass
 
         elif last_load_time is not None and cached_data is not None:
             # both last load time and cached data exist.
-            seconds_since_cache_update = round((time_now-last_load_time).total_seconds())
-
+            seconds_since_cache_update = round((time_now - last_load_time).total_seconds())
 
             if seconds_since_cache_update > min_seconds_between_fmi_calls:
-                #print("Cache age is " + str(seconds_since_cache_update)+ " seconds. Retrieving new data.")
+                # print("Cache age is " + str(seconds_since_cache_update)+ " seconds. Retrieving new data.")
                 pass
             else:
-                #print("Cache is new at " + str(seconds_since_cache_update) + " seconds. Reading data from cache.
+                # print("Cache is new at " + str(seconds_since_cache_update) + " seconds. Reading data from cache.
                 # This line should not print")
                 pass
 
@@ -107,11 +107,6 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
         else:
             raise Exception(
                 "Something wrong with caching. Last load time " + str(last_load_time))
-
-
-
-
-
 
     collection_string = "fmi::forecast::harmonie::surface::point::multipointcoverage"
 
@@ -127,7 +122,7 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
 
     # Collect data
 
-    latlon = str(latitude)+","+str(longitude)
+    latlon = str(latitude) + "," + str(longitude)
     snd = download_stored_query(collection_string,
                                 args=["latlon=" + latlon,
                                       "starttime=" + str(start_time),
@@ -135,20 +130,16 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
                                       'parameters=' + parameters_str])
     data = snd.data
 
-
     # checking if we got any data
     if len(data) == 0:
         raise Exception("FMI open data did not return a forecast with valid values. Check that geolocation is within "
                         "harmonie-arome model area shown in https://en.ilmatieteenlaitos.fi/weather-forecast-models "
-                        "and that requested time interval contains hours between now("+
+                        "and that requested time interval contains hours between now(" +
                         str(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")) + ") and "
-                        "forecast interval end " +
+                                                                                     "forecast interval end " +
                         str((datetime.now(timezone.utc) + timedelta(hours=66)).strftime("%Y-%m-%d %H:%M")))
 
-
-
-    #print("Got " + str(len(data))+ " values as forecast.")
-
+    # print("Got " + str(len(data))+ " values as forecast.")
 
     # Times to use in forming dataframe
     data_list = []
@@ -172,10 +163,9 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
 
     # index shift added since index is used as the time input of PVlib functions and using index is much easier
     # than using a separate time column
-    df["time"] = df.index.copy() # time backup
+    df["time"] = df.index.copy()  # time backup
     # timeshift has to be here
     df.index = df.index + dt.timedelta(minutes=-30)
-
 
     # Calculate instant from accumulated values (only radiation parameters)
     diff = df.diff()
@@ -212,7 +202,6 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
 
     df.columns = ["dni", "dhi", "ghi", "dir_hi", "albedo", "T", "wind", "cloud_cover"]
 
-
     # restricting values to zero
     clip_columns = ["dni", "dhi", "ghi"]
     df[clip_columns] = df[clip_columns].clip(lower=0.0)
@@ -222,8 +211,6 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
     # of odd symptoms in the PV model pipeline
     # df.index = df.index + dt.timedelta(minutes=-30)
 
-
-
     if cache_enabled:
         cached_data = df
         last_load_time = time_now
@@ -232,7 +219,7 @@ def collect_fmi_opendata(latitude:float, longitude:float, start_time:datetime, e
 
 
 def __get_irradiance_pvlib(latitude, longitude, date_start: datetime, date_end: datetime,
-                           minutes_between_measurements=60)-> pandas.DataFrame:
+                           minutes_between_measurements=60) -> pandas.DataFrame:
     """
     PVlib based clear sky irradiance modeling
     :param date: Datetime object containing a date

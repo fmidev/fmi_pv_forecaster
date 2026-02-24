@@ -10,12 +10,12 @@ Author: TimoSalola (Timo Salola).
 
 import math
 from datetime import datetime
+
 import numpy
 import pandas
 import pandas as pd
 
 from fmi_pv_forecaster.helpers import astronomical_calculations
-
 
 # panel reflectance constant, empirical value. Solar panels with better optical coatings would have a lower value where
 # as uncoated panels would have a higher value. Dust on panels increases reflectance_constant.
@@ -24,7 +24,7 @@ reflectance_constant = 0.159
 
 
 def components_to_corrected_poa(DNI_component: float, DHI_component: float, GHI_component: float,
-                                dt: pandas.DataFrame, latitude, longitude, tilt, azimuth)-> pandas.DataFrame:
+                                dt: pandas.DataFrame, latitude, longitude, tilt, azimuth) -> pandas.DataFrame:
     """
     Takes dni, dhi and ghi components of a solar panel projected irradiance and computes how much of the radiation is
     absorbed by the solar panels, in opposed to reflected away.
@@ -57,7 +57,7 @@ def add_reflection_corrected_poa_to_df(df: pandas.DataFrame) -> pandas.DataFrame
     :return:
     """
 
-    df["poa_ref_cor"] = df["dni_rc"]+ df["dhi_rc"]+ df["ghi_rc"]
+    df["poa_ref_cor"] = df["dni_rc"] + df["dhi_rc"] + df["ghi_rc"]
 
     # print("Adding reflection corrected POA to dataframe")
 
@@ -68,7 +68,7 @@ def add_reflection_corrected_poa_to_df(df: pandas.DataFrame) -> pandas.DataFrame
         return components_to_corrected_poa(df["dni_poa"], df["dhi_poa"], df["ghi_poa"], df["time"])
 
     # applying helper function to dataset and storing result as a new column
-    #df["poa_ref_cor"] = df.apply(helper_components_to_corrected_poa, axis=1)
+    # df["poa_ref_cor"] = df.apply(helper_components_to_corrected_poa, axis=1)
 
     # print("Reflection corrected POA values added.")
 
@@ -76,7 +76,7 @@ def add_reflection_corrected_poa_to_df(df: pandas.DataFrame) -> pandas.DataFrame
 
 
 def add_reflection_corrected_poa_components_to_df(df: pandas.DataFrame,
-                                                  latitude, longitude, tilt, azimuth)-> pandas.DataFrame:
+                                                  latitude, longitude, tilt, azimuth) -> pandas.DataFrame:
     """
     def helper_add_dni_ref(h_df):
         #  (1-alpha_BN)*BTN
@@ -99,17 +99,17 @@ def add_reflection_corrected_poa_components_to_df(df: pandas.DataFrame,
     dhi_reflection_value = __dhi_reflected(tilt)
     ghi_reflection_value = __ghi_reflected(tilt)
 
-    #df["AOI"] = astronomical_calculations.get_solar_angle_of_incidence_fast(df.index)
-    df["dni_rc"] = (1-__dni_reflected(df.index, latitude, longitude, tilt, azimuth))*df["dni_poa"]
-    df["dhi_rc"] = (1-dhi_reflection_value)*df["dhi_poa"]
-    df["ghi_rc"] = (1-ghi_reflection_value)*df["ghi_poa"]
+    # df["AOI"] = astronomical_calculations.get_solar_angle_of_incidence_fast(df.index)
+    df["dni_rc"] = (1 - __dni_reflected(df.index, latitude, longitude, tilt, azimuth)) * df["dni_poa"]
+    df["dhi_rc"] = (1 - dhi_reflection_value) * df["dhi_poa"]
+    df["ghi_rc"] = (1 - ghi_reflection_value) * df["ghi_poa"]
 
-
-    #print_full(df)
+    # print_full(df)
 
     return df
 
-def __dni_reflected(dt: datetime, latitude, longitude, tilt, azimuth)-> float:
+
+def __dni_reflected(dt: datetime, latitude, longitude, tilt, azimuth) -> float:
     """
     Computes a constant in range [0,1] which represents how much of the direct irradiance is reflected from panel
     surfaces.
@@ -134,7 +134,7 @@ def __dni_reflected(dt: datetime, latitude, longitude, tilt, azimuth)-> float:
     return dni_reflected
 
 
-def __ghi_reflected(tilt)-> float:
+def __ghi_reflected(tilt) -> float:
     """
     Computes a constant in range [0,1] which represents how much of ground reflected irradiation is reflected away from
     solar panel surfaces. Note that this is constant for an installation.
@@ -162,7 +162,7 @@ def __ghi_reflected(tilt)-> float:
     return ghi_reflected
 
 
-def __dhi_reflected(tilt)-> float:
+def __dhi_reflected(tilt) -> float:
     """
     Computes a constant in range [0,1] which represents how much of atmospheric diffuse light is reflected away from
     solar panel surfaces. Constant for an installation. Almost a 1 to 1 copy of __ghi_reflected except

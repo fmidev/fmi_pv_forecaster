@@ -7,10 +7,10 @@ name = "fmi-pv-forecast"
 version = "0.1.0"
 description = "Forecasting tools for FMI PV data"
 authors = [
-    {name="Timo Salola", email="you@example.com"}
+    { name = "Timo Salola", email = "you@example.com" }
 ]
 readme = "README.md"
-license = {text="MIT"}
+license = { text = "MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "pandas",
@@ -20,7 +20,7 @@ dependencies = [
 
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -5,12 +5,13 @@ dataframe.
 Author: TimoSalola (Timo Salola).
 """
 import math
+
 import pandas
 
 from fmi_pv_forecaster.helpers import default_parameters
 
 
-def add_estimated_panel_temperature(df:pandas.DataFrame)-> pandas.DataFrame:
+def add_estimated_panel_temperature(df: pandas.DataFrame) -> pandas.DataFrame:
     """
     Adds an estimate for panel temperature based on wind speed, air temperature and absorbed radiation.
     If air temperature, wind speed or absorbed radiation columns are missing, aborts.
@@ -24,11 +25,11 @@ def add_estimated_panel_temperature(df:pandas.DataFrame)-> pandas.DataFrame:
     # checking that all required variables exist in df
 
     if "T" not in df.columns:
-        #print("No air temperature in dataframe, using constant value: " + str(default_parameters.air_temperature)+"°C")
+        # print("No air temperature in dataframe, using constant value: " + str(default_parameters.air_temperature)+"°C")
         df["T"] = default_parameters.air_temperature
 
     if "wind" not in df.columns:
-        #print("No wind speed in dataframe, using constant value: " + str(default_parameters.wind_speed)+"m/s")
+        # print("No wind speed in dataframe, using constant value: " + str(default_parameters.wind_speed)+"m/s")
         df["wind"] = default_parameters.wind_speed
 
     if "poa_ref_cor" not in df.columns:
@@ -37,7 +38,8 @@ def add_estimated_panel_temperature(df:pandas.DataFrame)-> pandas.DataFrame:
         return df
 
     def helper_add_panel_temp(df):
-        estimated_temp = temperature_of_module(df["poa_ref_cor"], df["wind"], default_parameters.panel_elevation, df["T"])
+        estimated_temp = temperature_of_module(df["poa_ref_cor"], df["wind"], default_parameters.panel_elevation,
+                                               df["T"])
 
         if math.isnan(estimated_temp):
             return df["T"]
@@ -50,9 +52,8 @@ def add_estimated_panel_temperature(df:pandas.DataFrame)-> pandas.DataFrame:
     return df
 
 
-
 def temperature_of_module(absorbed_radiation: float, wind: float,
-                          module_elevation: float, air_temperature: float) ->float:
+                          module_elevation: float, air_temperature: float) -> float:
     """
     :param absorbed_radiation: radiation hitting solar panel after reflections are accounted for in W
     :param wind: wind speed in meters per second

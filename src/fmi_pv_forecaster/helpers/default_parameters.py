@@ -1,5 +1,3 @@
-
-
 # panel to ground distance, used for wind speed to wind speed at panel estimation
 panel_elevation = 7
 

@@ -2,14 +2,18 @@ This document has examples on how to use the python package.
 
 **Table of contents**
 <!-- TOC -->
-  * [Example 1: FMI weather forecast based PV system output](#example-1-fmi-weather-forecast-based-pv-system-output)
-  * [Example 2: Plotting clearsky and FMI weather based forecasts into the same plot](#example-2-plotting-clearsky-and-fmi-weather-based-forecasts-into-the-same-plot)
-  * [Example 3. Processing external data with the PV model](#example-3-processing-external-data-with-the-pv-model)
-  * [Example 4. Forecast interpolation](#example-4-forecast-interpolation)
-  * [Example 5. Estimating clearsky power for custom time interval](#example-5-estimating-clearsky-power-for-custom-time-interval)
-  * [Example 6. Multiple panel angles](#example-6-multiple-panel-angles)
+
+* [Example 1: FMI weather forecast based PV system output](#example-1-fmi-weather-forecast-based-pv-system-output)
+* [Example 2: Plotting clearsky and FMI weather based forecasts into the same plot](#example-2-plotting-clearsky-and-fmi-weather-based-forecasts-into-the-same-plot)
+* [Example 3. Processing external data with the PV model](#example-3-processing-external-data-with-the-pv-model)
+* [Example 4. Forecast interpolation](#example-4-forecast-interpolation)
+* [Example 5. Estimating clearsky power for custom time interval](#example-5-estimating-clearsky-power-for-custom-time-interval)
+* [Example 6. Multiple panel angles](#example-6-multiple-panel-angles)
+
 <!-- TOC -->
+
 ## Example 1: FMI weather forecast based PV system output
+
 ```python
 import fmi_pv_forecaster as pvfc
 
@@ -21,7 +25,7 @@ Power rating set at 4kw.
 """
 
 pvfc.set_angles(25, 180)
-pvfc.set_location(60.1576,24.8762)
+pvfc.set_location(60.1576, 24.8762)
 pvfc.set_nominal_power_kw(4)
 
 data = pvfc.get_default_fmi_forecast()
@@ -32,8 +36,8 @@ print(data)
 
 ```
 
-
 Resulting print:
+
 ```commandline
 Forecast:
                         T  wind  module_temp     output
@@ -51,16 +55,17 @@ Time
 2026-01-23 05:30:00   NaN   NaN          NaN   0.000000
 ```
 
-
 **Output parameters explained:**
+
 - **Time** Datetime index, times are in UTC time.
 - **T** Air temperature at 2m from ground.
 - **wind** Wind speed in m/s at 2m from ground.
 - **cloud_cover** Value in range [0,100]. 0 indicates clear sky, 100 for full cloud cover.
-- **module_temp** Modeled module temperature in Celsius. 
+- **module_temp** Modeled module temperature in Celsius.
 - **output** Power output in watts.
 
 ---
+
 ## Example 2: Plotting clearsky and FMI weather based forecasts into the same plot
 
 ```python
@@ -68,10 +73,9 @@ import fmi_pv_forecaster as pvfc
 import datetime
 import matplotlib.pyplot as plt
 
-
 # setting parameters
-pvfc.set_angles(25, 235) # south-west facing panels
-pvfc.set_location(55.6804144,12.5821649) # near Copenhagen, Denmark
+pvfc.set_angles(25, 235)  # south-west facing panels
+pvfc.set_location(55.6804144, 12.5821649)  # near Copenhagen, Denmark
 pvfc.set_nominal_power_kw(10)
 
 pvfc.set_clearsky_fc_timestep(5)
@@ -90,8 +94,7 @@ data_clearsky = pvfc.get_default_clearsky_estimate()
 fig, ax = plt.subplots(layout='constrained')
 
 plt.plot(data.index, data["output"], label="Forecast", color="#303193")
-plt.plot(data_clearsky.index, data_clearsky["output"], label="Cloud free forecast",  color="#6ec8fa")
-
+plt.plot(data_clearsky.index, data_clearsky["output"], label="Cloud free forecast", color="#6ec8fa")
 
 # adding axis labels, titles and other text elements
 ax.set_xlabel("Time")
@@ -107,7 +110,6 @@ plt.legend(loc='upper right')
 plt.show()
 ```
 
-
 **Resulting plot:**
 
 <img src="readme_images/example_2_img.png" height="300"/>
@@ -115,12 +117,12 @@ plt.show()
 
 ---
 
-
 ## Example 3. Processing external data with the PV model
 
 ```python
 import pandas as pd
 import fmi_pv_forecaster as pvfc
+
 
 # Helper function for printing
 def print_full(x: pd.DataFrame):
@@ -138,7 +140,6 @@ def print_full(x: pd.DataFrame):
     pd.reset_option('display.max_columns')
     pd.reset_option('display.width')
     pd.reset_option('display.float_format')
-
 
 
 # setting system parameters
@@ -208,12 +209,12 @@ time
 2024-06-01 18:30:00+00:00      23.36       4.26        23.93     245.23
 ```
 
-
 Here the input dataframe has the following columns:
+
 * time = UTC datatime index
-* dni = direct normal irradiance [W/m²] 
-* dhi = diffuse horizontal irradiance [W/m²] 
-* ghi = global horizontal irradiance [W/m²] 
+* dni = direct normal irradiance [W/m²]
+* dhi = diffuse horizontal irradiance [W/m²]
+* ghi = global horizontal irradiance [W/m²]
 * T = air temperature [C]
 * wind = wind speed [m/s]
 * albedo = ground reflectivity [0-1]
@@ -226,21 +227,20 @@ the dataframe doesn't have the variables in the dataframe. The constants can als
 
 ---
 
-
 ## Example 4. Forecast interpolation
+
 The FMI forecasts may not always align with times which are convenient for the user. For example, if you are interested
 in data with time resolution of 15 minutes, eq. (12:00, 12:15, 12:30,...), FMI open data time resolution is 60 minutes
 and this obviously causes issues.
 
-
-There are a few ways of working around the issue, none of which are perfect. This package has a built-in linear interpolation
--based solution for the problem. Linear interpolation is the process of taking two datapoints, eq. 12:30 and 13:30, drawing a line between them
+There are a few ways of working around the issue, none of which are perfect. This package has a built-in linear
+interpolation
+-based solution for the problem. Linear interpolation is the process of taking two datapoints, eq. 12:30 and 13:30,
+drawing a line between them
 and checking what the value is for 12:46(or any other point in time between the two).
-Linear interpolation doesn't have any time constraints and while the function can be used to get power or any other value
+Linear interpolation doesn't have any time constraints and while the function can be used to get power or any other
+value
 at 15 minute resolution, calculating a new power value for any moment in time within the forecast interval is possible.
-
-
-
 
 **The downside** with linear interpolation is that the actual physical transitioning between two states is not always
 linear. And as the data from FMI open data is already averaged, complex and variable changes in weather are reduced into
@@ -248,14 +248,12 @@ linear transitions between two states.
 Meteorologists could also say that the average of two weather states is not a valid
 state of weather, even if it often represents actual weather quite well.
 
-
 ```python
 import datetime
 import fmi_pv_forecaster as pvfc
 
-
-pvfc.set_angles(25, 235) # south-west facing panels
-pvfc.set_location(57.0095361,24.06272) # near Riga, Latvia
+pvfc.set_angles(25, 235)  # south-west facing panels
+pvfc.set_location(57.0095361, 24.06272)  # near Riga, Latvia
 pvfc.set_nominal_power_kw(10)
 
 data = pvfc.get_default_fmi_forecast()
@@ -264,18 +262,19 @@ print("Forecast:")
 print(data)
 
 # printing power at mid day using interpolation
-point_in_time1 = datetime.datetime(2026, 2 , 5,  12)
+point_in_time1 = datetime.datetime(2026, 2, 5, 12)
 datapoint1 = pvfc.get_fmi_forecast_at_interpolated_time(point_in_time1)["output"]
-print("Power at " + str(point_in_time1) + " = " + str(round(datapoint1)) +"W")
+print("Power at " + str(point_in_time1) + " = " + str(round(datapoint1)) + "W")
 
 # printing power on an arbitrary second using interpolation
-point_in_time2 = datetime.datetime(year=2026, month=2 , day=5, hour=11, minute=14, second=10)
+point_in_time2 = datetime.datetime(year=2026, month=2, day=5, hour=11, minute=14, second=10)
 datapoint2 = pvfc.get_fmi_forecast_at_interpolated_time(point_in_time2)["output"]
-print("Power at " + str(point_in_time2) + " = " + str(round(datapoint2)) +"W")
+print("Power at " + str(point_in_time2) + " = " + str(round(datapoint2)) + "W")
 
 ```
 
 **Output:**
+
 ```commandline
 Forecast:
                         T  wind  module_temp       output
@@ -298,12 +297,13 @@ Power at 2026-02-05 11:14:10 = 1492W
 ```
 
 ---
+
 ## Example 5. Estimating clearsky power for custom time interval
 
-This sample shows how to calculate clear sky forecast for a single day at 1-minute time resolution using a time 
+This sample shows how to calculate clear sky forecast for a single day at 1-minute time resolution using a time
 interval which isn't available from FMI open data.
 
-Note that forecasting like this is not limited geographically. 
+Note that forecasting like this is not limited geographically.
 
 ```python
 import datetime
@@ -313,10 +313,10 @@ import matplotlib.pyplot as plt
 # system parameters, declared as variables so we can also plot the same values in the plot easily
 tilt = 12
 azimuth = 170
-size = 12 # 12kw
+size = 12  # 12kw
 # setting parameters
-pvfc.set_angles(tilt, azimuth) # south-west facing panels
-pvfc.set_location(62.9,27.6)
+pvfc.set_angles(tilt, azimuth)  # south-west facing panels
+pvfc.set_location(62.9, 27.6)
 pvfc.set_nominal_power_kw(size)
 
 # setting parameters which affect clearsky forecast
@@ -324,8 +324,8 @@ pvfc.set_default_air_temp(14)
 pvfc.set_default_albedo(0.2)
 
 # generating forecast
-date_start = datetime.datetime(2021,5, 30, 0, 0)
-date_end = datetime.datetime(2021,5,30,23, 59)
+date_start = datetime.datetime(2021, 5, 30, 0, 0)
+date_end = datetime.datetime(2021, 5, 30, 23, 59)
 
 data = pvfc.get_clearsky_estimate_for_interval(date_start, date_end, 1)
 # ^ final input variable here chooses the time between measurements in minutes. 1 results in really smooth plots
@@ -335,7 +335,6 @@ fig, ax = plt.subplots(layout='constrained')
 
 plt.plot(data.index, data["output"], label="Clearsky forecast", color="black")
 
-
 # adding axis labels, titles and other text elements
 ax.set_xlabel("Time")
 ax.set_ylabel("Power(W)")
@@ -344,11 +343,10 @@ timenow = date_start
 timenow_string = datetime.datetime.fromtimestamp(timenow.timestamp()).strftime('%Y-%m-%d %H:%M')
 plt.title("PV Forecast - " + timenow_string)
 
-
 # parameter string, shows in the plot
-explainer_txt = "Tilt: " + str(tilt) + " Azimuth: " + str(azimuth) + "\n" + "Size: " + str(size) +"kW."
+explainer_txt = "Tilt: " + str(tilt) + " Azimuth: " + str(azimuth) + "\n" + "Size: " + str(size) + "kW."
 # adding the parameter string to the plot, forecast start a X position, 80% of max power as text Y.
-plt.text(date_start, max(data["output"])*0.8, explainer_txt)
+plt.text(date_start, max(data["output"]) * 0.8, explainer_txt)
 
 ax.grid()
 
@@ -359,6 +357,7 @@ plt.show()
 
 
 ```
+
 **Resulting plot:**
 
 <img src="readme_images/example_5_img.png" height="300"/>
@@ -377,12 +376,10 @@ bandwidth and API calls.
 The same code could be used for forecasting the output of bifacial systems with some tuning. Our understanding
 suggests that bifacial panels could be modeled as 2 panels with opposing directions with fairly good accuracy.
 
-
 ````python
 import datetime
 import fmi_pv_forecaster as pvfc
 import matplotlib.pyplot as plt
-
 
 """
 This example shows how to generate PV forecasts for a PV system with 2 panel banks with differing panel angles.
@@ -392,15 +389,15 @@ This could be used for bifacial system modeling.
 # Panel set 1
 tilt_1 = 45
 azimuth_1 = 180
-size_1 = 4 # 4kw
+size_1 = 4  # 4kw
 
 # panel set 2
 tilt_2 = 90
 azimuth_2 = 270
-size_2 = 2 # 2kw
+size_2 = 2  # 2kw
 
 # setting common variables for the PV site
-pvfc.set_location(65.013297,25.4647086) # The exact location of Toripoliisi in Oulu, Finland
+pvfc.set_location(65.013297, 25.4647086)  # The exact location of Toripoliisi in Oulu, Finland
 pvfc.set_default_air_temp(15)
 pvfc.set_default_albedo(0.2)
 pvfc.set_clearsky_fc_timestep(5)
@@ -423,10 +420,8 @@ clearsky_for_panels2 = pvfc.get_default_clearsky_estimate()
 # was cached from panel group 1 request.
 
 
-
-
 # plotting forecast
-fig, ax = plt.subplots(layout='constrained', figsize=(12,5))
+fig, ax = plt.subplots(layout='constrained', figsize=(12, 5))
 
 # FMI and clearsky forecasts for the panel group 1. Using red-ish colors with less vibrant color for clearsky
 plt.plot(data_for_panels1.index, data_for_panels1["output"], label="Panel group 1 forecast", color="red")
@@ -437,9 +432,10 @@ plt.plot(data_for_panels2.index, data_for_panels2["output"], label="Panel group 
 plt.plot(clearsky_for_panels2.index, clearsky_for_panels2["output"], label="Panel group 2 clearsky", color="cyan")
 
 # Sum of FMI and clearsky forecasts for both panel groups, Using black-ish colors with less vibrant color for clearsky
-plt.plot(data_for_panels2.index, data_for_panels1["output"]+data_for_panels2["output"], label="Total power fc[W]", color="black")
-plt.plot(clearsky_for_panels1.index, clearsky_for_panels1["output"]+clearsky_for_panels2["output"], label="Total power clearsky[W]", color="grey")
-
+plt.plot(data_for_panels2.index, data_for_panels1["output"] + data_for_panels2["output"], label="Total power fc[W]",
+         color="black")
+plt.plot(clearsky_for_panels1.index, clearsky_for_panels1["output"] + clearsky_for_panels2["output"],
+         label="Total power clearsky[W]", color="grey")
 
 # adding axis labels, titles and other text elements
 ax.set_xlabel("Time")

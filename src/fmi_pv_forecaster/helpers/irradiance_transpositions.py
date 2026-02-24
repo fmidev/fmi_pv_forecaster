@@ -12,6 +12,7 @@ Author: TimoSalola (Timo Salola).
 
 import math
 from datetime import datetime
+
 import numpy
 import pandas
 import pandas as pd
@@ -38,9 +39,11 @@ def print_full(x: pandas.DataFrame):
     pd.reset_option('display.float_format')
     pd.reset_option('display.max_colwidth')
 
-def irradiance_df_to_poa_df(irradiance_df:pandas.DataFrame, latitude, longitude, tilt, azimuth)-> pandas.DataFrame:
+
+def irradiance_df_to_poa_df(irradiance_df: pandas.DataFrame, latitude, longitude, tilt, azimuth) -> pandas.DataFrame:
     """
-    This function takes an irradiance dataframe as input. This dataframe should contain ghi, dni and dhi irradiance values
+    This function takes an irradiance dataframe as input. This dataframe should contain ghi, dni and dhi
+    irradiance values.
     These values are then projected to the panel surfaces either using simple geometry or more complex equations.
 
     :param irradiance_df: Solar irradiance dataframe with ghi, dni and dhi components.
@@ -51,34 +54,32 @@ def irradiance_df_to_poa_df(irradiance_df:pandas.DataFrame, latitude, longitude,
     irradiance_df["dni_poa"] = __project_dni_to_panel_surface_using_time_fast(
         irradiance_df["dni"], irradiance_df.index, latitude, longitude, tilt, azimuth)
 
-
     # perez dhi function, this had continuity issues before it was changed to modified perez
     irradiance_df["dhi_poa"] = __project_dhi_to_panel_surface_perez_fast(
         irradiance_df.index, irradiance_df["dhi"], irradiance_df["dni"], latitude, longitude, tilt, azimuth)
-
 
     # and finally ghi
     if "albedo" in irradiance_df.columns:
         irradiance_df["ghi_poa"] = __project_ghi_to_panel_surface(irradiance_df["ghi"], tilt, irradiance_df["albedo"])
     else:
-        #print("Using constant albedo of " + str(fmi_pv_forecast.helpers.default_parameters.albedo) +".")
+        # print("Using constant albedo of " + str(fmi_pv_forecast.helpers.default_parameters.albedo) +".")
         irradiance_df["ghi_poa"] = __project_ghi_to_panel_surface(irradiance_df["ghi"], tilt)
 
     # adding the sum of projections to df as poa
     irradiance_df["poa"] = irradiance_df["dhi_poa"] + irradiance_df["dni_poa"] + irradiance_df["ghi_poa"]
-
 
     return irradiance_df
 
 
 """
 PROJECTION FUNCTIONS
-4 functions for 3 components, 2 functions for DNI as either date or angle of incidence can be used for computing the 
+4 functions for 3 components, 2 functions for DNI as either date or angle of incidence can be used for computing the
 same result.
 """
 
 
-def __project_dni_to_panel_surface_using_time_fast(dni: float, dt: datetime, latitude, longitude, tilt, azimuth)-> float:
+def __project_dni_to_panel_surface_using_time_fast(dni: float, dt: datetime,
+                                                   latitude, longitude, tilt, azimuth) -> float:
     """
     :param DNI: Direct sunlight irradiance component in W
     :param dt: Time of simulation
@@ -87,7 +88,6 @@ def __project_dni_to_panel_surface_using_time_fast(dni: float, dt: datetime, lat
     This version of the function is fairly well optimized.
     """
 
-
     angle_of_incidence = astronomical_calculations.get_solar_angle_of_incidence_fast(dt, latitude, longitude,
                                                                                      tilt, azimuth)
     output = numpy.abs(__project_dni_to_panel_surface_using_angle(dni, angle_of_incidence))
@@ -95,8 +95,7 @@ def __project_dni_to_panel_surface_using_time_fast(dni: float, dt: datetime, lat
     return output
 
 
-
-def __project_dni_to_panel_surface_using_angle(dni: float, angle_of_incidence: float)-> float:
+def __project_dni_to_panel_surface_using_angle(dni: float, angle_of_incidence: float) -> float:
     """
     Based on https://pvpmc.sandia.gov/modeling-steps/1-weather-design-inputs/plane-of-array-poa-irradiance
     /calculating-poa-irradiance/poa-beam/
@@ -108,7 +107,7 @@ def __project_dni_to_panel_surface_using_angle(dni: float, angle_of_incidence: f
     return dni * numpy.cos(numpy.radians(angle_of_incidence))
 
 
-def __project_dhi_to_panel_surface(dhi: float, tilt)-> float:
+def __project_dhi_to_panel_surface(dhi: float, tilt) -> float:
     """
     Uses atmosphere scattered sunlight and solar panel angles to estimate how much of the scattered light is radiated
     towards solar panel surfaces.
@@ -118,9 +117,8 @@ def __project_dhi_to_panel_surface(dhi: float, tilt)-> float:
     return dhi * ((1.0 + math.cos(numpy.radians(tilt))) / 2.0)
 
 
-
 def __project_dhi_to_panel_surface_perez_fast(time: datetime, dhi: float, dni: float, latitude, longitude,
-                                              tilt:float, azimuth:float)-> float:
+                                              tilt: float, azimuth: float) -> float:
     """
     Alternative dhi model,
     Calculated internally by pvlib, pvlib documentation at:
@@ -144,7 +142,7 @@ def __project_dhi_to_panel_surface_perez_fast(time: datetime, dhi: float, dni: f
     airmass = astronomical_calculations.get_air_mass_fast(time, latitude, longitude)
 
     # old perez function
-    #dhi_perez = pvlib.irradiance.perez(surface_tilt, surface_azimuth,dhi, dni, dni_extra,
+    # dhi_perez = pvlib.irradiance.perez(surface_tilt, surface_azimuth,dhi, dni, dni_extra,
     # solar_zenith, solar_azimuth, airmass, return_components=False)
 
     # modified perez
@@ -154,8 +152,8 @@ def __project_dhi_to_panel_surface_perez_fast(time: datetime, dhi: float, dni: f
     return dhi_perez
 
 
-def __project_ghi_to_panel_surface(ghi: float, tilt:float,
-                                   albedo=fmi_pv_forecaster.helpers.default_parameters.albedo)-> float:
+def __project_ghi_to_panel_surface(ghi: float, tilt: float,
+                                   albedo=fmi_pv_forecaster.helpers.default_parameters.albedo) -> float:
     """
     Equation from
     https://pvpmc.sandia.gov/modeling-guide/1-weather-design-inputs/plane-of-array-poa-irradiance/calculating-poa-irradiance/poa-ground-reflected/
@@ -165,6 +163,6 @@ def __project_ghi_to_panel_surface(ghi: float, tilt:float,
     :param ghi: Ground reflected solar irradiance.
     :return: Ground reflected solar irradiance hitting the solar panel surface.
     """
-    step1 = (1.0-math.cos(numpy.radians(tilt)))/2
-    step2 = ghi*albedo * step1
-    return step2 # ghi * config.albedo * ((1.0 - math.cos(numpy.radians(config.tilt))) / 2.0)
+    step1 = (1.0 - math.cos(numpy.radians(tilt))) / 2
+    step2 = ghi * albedo * step1
+    return step2  # ghi * config.albedo * ((1.0 - math.cos(numpy.radians(config.tilt))) / 2.0)
