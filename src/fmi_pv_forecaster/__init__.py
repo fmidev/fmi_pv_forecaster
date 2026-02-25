@@ -1,5 +1,5 @@
 # System parameters
-from .pv_forecaster import add_local_time_column
+
 # debug
 from .pv_forecaster import force_clear_fmi_cache
 from .pv_forecaster import get_clearsky_estimate_for_interval
@@ -9,12 +9,11 @@ from .pv_forecaster import get_default_fmi_forecast
 from .pv_forecaster import get_fmi_forecast_at_interpolated_time
 from .pv_forecaster import get_fmi_forecast_for_interval
 from .pv_forecaster import get_timezone
+from .pv_forecaster import get_default_clearsky_forecast
 # external usage
 from .pv_forecaster import process_radiation_df
 from .pv_forecaster import set_angles
 from .pv_forecaster import set_cache
-from .pv_forecaster import set_clearsky_fc_time_offset
-from .pv_forecaster import set_clearsky_fc_timestep
 from .pv_forecaster import set_default_air_temp
 # clearsky system parameters
 from .pv_forecaster import set_default_albedo
@@ -37,8 +36,6 @@ __all__ = [
     "set_clearsky_fc_timestep",
     "set_clearsky_fc_time_offset",
 
-    "add_local_time_column",
-
     # optional system parameters
     "set_module_elevation",
 
@@ -53,6 +50,7 @@ __all__ = [
     "get_clearsky_estimate_for_interval",
     "get_fmi_forecast_for_interval",
     "get_fmi_forecast_at_interpolated_time",
+    "get_default_clearsky_forecast",
 
     # toggles
     "set_extended_output",

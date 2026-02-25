@@ -22,6 +22,8 @@ extended_output = False  # set to true and the radiation parameters and intermed
 
 power_rating = 1  # power in kw
 
+align_clearsky_and_fmi = True
+
 timezone = "UTC"
 
 
@@ -192,9 +194,10 @@ def set_timezone(timezone_string):
     all_viable_timezones = pytz.all_timezones_set
 
     if timezone_string not in all_viable_timezones:
-        raise ValueError("Given timezone \"" + str(timezone_string) + "\" is not in pytz.all_timezones. Timezone should"
-                                                                      " be similar to \"Europe/Helsinki\", List of valid timezones can be found at "
-                                                                      "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
+        raise ValueError("Given timezone \""
+                         + str(timezone_string) + "\" is not in pytz.all_timezones. Timezone should"
+                          " be similar to \"Europe/Helsinki\", List of valid timezones can be found at "
+                          "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
 
     timezone = timezone_string
 
@@ -318,7 +321,7 @@ def get_clearsky_estimate_for_interval(interval_start, interval_end, timestep=60
 
     # timeshifting
     # this cannot be used as setting a minute is not possible, this kills time offset function
-    offset = fmi_pv_forecaster.helpers.default_parameters.clearsky_fc_time_offset
+    offset = 30
 
     interval_start = datetime.datetime(year=interval_start.year, month=interval_start.month, day=interval_start.day,
                                        hour=interval_start.hour, minute=offset)
@@ -382,7 +385,7 @@ def __get_fmi_forecast_rad_data():
     return data
 
 
-def get_default_fmi_forecast(interpolate=False):
+def get_default_fmi_forecast(interpolate=False) -> pd.DataFrame:
     """
     This function returns the whole 66~ish hour FMI forecast available at this moment in time.
     Timestamps in the forecast are every 60 minutes with a 30min offset. 12:30, 13:30 and so on, using UTC time.
@@ -392,6 +395,11 @@ def get_default_fmi_forecast(interpolate=False):
     Interpolation works nicely with values which divide 60 into integers. 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1
     :return:
     """
+
+
+    interpolate = False
+
+    interpolate = "15min"
 
     # getting the hourly 66 hour forecast
     data = __get_fmi_forecast_rad_data()
@@ -411,38 +419,23 @@ def get_default_fmi_forecast(interpolate=False):
 
     return data
 
-
-def set_clearsky_fc_timestep(new_timestep):
+def get_default_clearsky_forecast(timestep = 60) -> pd.DataFrame:
     """
-    This function will set timestep in minutes used by clearsky forecasts.
-    Default value is 60 in order to match FMI forecasts, but any integer value can be used.
 
-    Values such as 15 or 5 will result in smooth plots and as the PV model is fast, even using 1 will not slow the
-    clearsky function significantly.
-
-    With 60-minute timesteps forecasts will be timed 12:00, 13:00, 14:00 ...
-    With 30-minute timesteps forecasts will be timed 12:00, 12:30, 13:00 ...
-
-    See set_clearsky_fc_time_offset() for adjusting forecast offsets.
-
-    :param new_timestep: Timestep in minutes.
     """
-    fmi_pv_forecaster.helpers.default_parameters.clearsky_fc_timestep = new_timestep
+
+    time_start = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) - datetime.timedelta(hours=3)
+    time_start = datetime.datetime(time_start.year, time_start.month, time_start.day, time_start.hour)
+    time_end = time_start + datetime.timedelta(hours=68)
+
+    data = get_clearsky_estimate_for_interval(
+        time_start,
+        time_end,
+        timestep)
+
+    return data
 
 
-def set_clearsky_fc_time_offset(new_offset):
-    """
-    This function will set offset in minutes used by clearsky forecasts.
-    Normally forecasts are done hourly with 0 offsets, meaning 12:00, 13:00, 14:00 ...
-
-    With default 0-minute offsets forecasts will be timed 12:00, 13:00, 14:00 ...
-    With 30-minute offsets forecasts will be timed 12:30, 13:30, 14:30 ...
-
-    See set_clearsky_fc_timestep() for adjusting time between measurements.
-
-    :param new_offset: Forecast timestamp offset.
-    """
-    fmi_pv_forecaster.helpers.default_parameters.clearsky_fc_time_offset = new_offset
 
 
 def get_default_clearsky_estimate():
@@ -568,26 +561,3 @@ def __interpolate_nearest_power_to_time_value(power_df, time_value):
     return interpolated_row
 
 
-def add_local_time_column(df):
-    """
-    This function adds a column "local_time" to given dataframe. Local time is calculated based on timezone given with
-    set_timezone() and the index of the dataframe which should be naive or timezone aware UTC timestamp.
-
-    :return Original DF with new "local_time" - column.
-    """
-    # reading given timezone
-    tz = get_timezone()
-
-    # extracting index, index can be timezone aware or naive
-    idx = df.index
-
-    if idx.tz is None:  # handling aware and naive situations with separate functions
-        idx = idx.tz_localize("UTC")
-    else:
-        idx = idx.tz_convert("UTC")
-
-    # this avoids setting with copy warning.
-    df = df.copy()
-    df["local_time"] = idx.tz_convert(tz)
-
-    return df

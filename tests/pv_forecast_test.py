@@ -363,29 +363,6 @@ def test_set_get_timezone():
     assert pv_forecast.get_timezone() == "Indian/Maldives"
 
 
-def test_add_localtime():
-    print("Testing local time column adding to fmi forecast")
-    fmi_pv_forecaster.set_timezone("Indian/Maldives")
-    forecast = fmi_pv_forecaster.get_default_fmi_forecast()
-    forecast = fmi_pv_forecaster.add_local_time_column(forecast)
-
-    print("resulting df: ")
-    print(forecast)
-
-    # check that none of the local times were NotATime, NaT's are a common failure mode here
-    assert numpy.datetime64('NaT') not in forecast["local_time"]
-
-    print("testing local time column adding to clearsky forecast")
-    clearsky_forecast = fmi_pv_forecaster.get_default_clearsky_estimate()
-    clearsky_forecast = fmi_pv_forecaster.add_local_time_column(clearsky_forecast)
-
-    print("resulting df: ")
-    print(clearsky_forecast)
-
-    # check that none of the local times were NotATime, NaT's are a common failure mode here
-    assert numpy.datetime64('NaT') not in clearsky_forecast[
-        "local_time"], "Clearsky local_time adding resulted in NaT-values"
-
 
 def test_interpolation_multiple_times():
     """
