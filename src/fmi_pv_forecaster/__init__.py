@@ -3,13 +3,13 @@
 # debug
 from .pv_forecaster import force_clear_fmi_cache
 from .pv_forecaster import get_clearsky_estimate_for_interval
-from .pv_forecaster import get_default_clearsky_estimate
 # Forecast functions
 from .pv_forecaster import get_default_fmi_forecast
 from .pv_forecaster import get_fmi_forecast_at_interpolated_time
 from .pv_forecaster import get_fmi_forecast_for_interval
 from .pv_forecaster import get_timezone
 from .pv_forecaster import get_default_clearsky_forecast
+from .pv_forecaster import get_fmi_radiation_forecast
 # external usage
 from .pv_forecaster import process_radiation_df
 from .pv_forecaster import set_angles
@@ -33,8 +33,6 @@ __all__ = [
     "set_nominal_power_kw",
     "set_timezone",
     "get_timezone",
-    "set_clearsky_fc_timestep",
-    "set_clearsky_fc_time_offset",
 
     # optional system parameters
     "set_module_elevation",
@@ -46,11 +44,11 @@ __all__ = [
 
     # forecast functions
     "get_default_fmi_forecast",
-    "get_default_clearsky_estimate",
     "get_clearsky_estimate_for_interval",
     "get_fmi_forecast_for_interval",
     "get_fmi_forecast_at_interpolated_time",
     "get_default_clearsky_forecast",
+    "get_fmi_radiation_forecast",
 
     # toggles
     "set_extended_output",

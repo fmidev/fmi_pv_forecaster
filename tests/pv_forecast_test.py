@@ -7,6 +7,7 @@ import pandas
 import pandas as pd
 import pytest
 
+
 import fmi_pv_forecaster
 from fmi_pv_forecaster import pv_forecaster as pv_forecast
 
@@ -471,3 +472,7 @@ def test_setting_of_time_offset():
 
     print("Timedelta between rows was " + str(timedelta_minutes))
     print("The set timestep was: " + str(timestep))
+
+
+
+
