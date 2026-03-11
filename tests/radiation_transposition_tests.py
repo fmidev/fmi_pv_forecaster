@@ -14,17 +14,18 @@ import random
 IRRADIANCE TRANSPOSITION MINI FUNCTION TESTS
 """
 
+test_count = 300
 
 def test_ghi_transposition():
 
-    for i in range(0, 100):
+    for i in range(0, test_count):
         ghi = random.random()*1000
         tilt = random.randint(0,90)
         albedo = random.random()
 
         transposed_irradiance = irradiance_transpositions.__project_ghi_to_panel_surface(ghi, tilt, albedo)
 
-        print(transposed_irradiance)
+        #print(transposed_irradiance)
 
         assert transposed_irradiance >= 0, (
             "Transposed ghi was negative, this should never happen."
@@ -34,7 +35,7 @@ def test_ghi_transposition():
             "Transposed ghi was greater than ghi, this should never happen."
         )
 
-    print("Tested 100 random ghi transpositions, no obvious faults found.")
+    print("Tested " + str(test_count)+" random ghi transpositions, no obvious faults found.")
 
 def test_dhi_transposition_tilt0():
     """
@@ -50,7 +51,9 @@ def test_dhi_transposition_tilt0():
 
     """
 
-    for i in range(0, 300):
+    test_count = 300
+
+    for i in range(0, test_count):
 
         time = datetime.datetime.now()
 
@@ -68,26 +71,29 @@ def test_dhi_transposition_tilt0():
 
         irradiance_driesse = round(irradiance_transpositions.__project_dhi_to_panel_surface_perez_fast(time, dhi, dni,
                                 latitude, longitude, tilt, azimuth), 2)
+        irradiance_driesse = irradiance_driesse.values[0]
 
         irradiance_perez = round(
             irradiance_transpositions.__project_dhi_to_panel_surface_perez_fast(time, dhi, dni,
                                        latitude, longitude, tilt, azimuth, driesse=False), 2)
+        irradiance_perez = irradiance_perez.values[0]
 
         irradiance_isotropic = irradiance_transpositions.__project_dhi_to_panel_surface(dhi, tilt)
 
         """
         print("=====")
-        print("dni: " + str(dni)+"w")
-        print("dhi: " + str(dhi)+"w")
-        print("tilt: " + str(tilt)+"deg")
-        print("azimuth: " + str(azimuth)+"deg")
-        print("aoi: " + str(aoi)+"deg")
-        print("Transposed irradiances:")
-        print("Driesse: " + str(irradiance_driesse) +"w")
-        print("Perez: " + str(irradiance_perez) + "w")
-        print("Isotropic:: " + str(irradiance_isotropic) + "w")
+        print("dni: " + str(dni)+"W")
+        print("dhi: " + str(dhi)+"W")
+        print("tilt: " + str(tilt)+" deg")
+        print("azimuth: " + str(azimuth)+" deg")
+        print("aoi: " + str(aoi)+" deg")
+        print("-- Transposed irradiances --")
+        print("Driesse: " + str(irradiance_driesse) +"W")
+        print("Perez: " + str(irradiance_perez) + "W")
+        print("Isotropic:: " + str(irradiance_isotropic) + "W")
         print("=====")
         """
+
 
         # negative tests
         assert irradiance_driesse >= 0, (
@@ -127,7 +133,7 @@ def test_dhi_transposition_tilt0():
             "Perez-driesse model should not result in values higher than isotropic."
         )
 
-    print("Tested 300 random dhi transpositions at tilt = 0 using otherwise random inputs. No faults found.")
+    print("Tested " + str(test_count) + " random dhi transpositions with fixed tilt. No faults found.")
 
 def test_dhi_transposition_random_panel_angles():
     """
@@ -137,7 +143,8 @@ def test_dhi_transposition_random_panel_angles():
     This tests random panel angles. Results are more random and fewer restrictions are in place.
     """
 
-    for i in range(0, 300):
+    test_count = 300
+    for i in range(0, test_count):
         time = datetime.datetime.now()
 
         dhi = round(random.random() * 300, 2)
@@ -151,15 +158,18 @@ def test_dhi_transposition_random_panel_angles():
         aoi = round(
             astronomical_calculations.get_solar_angle_of_incidence_fast_unlimited(time, latitude, longitude, tilt, azimuth), 2)
 
+        # Irradiance values as floats
         irradiance_driesse = round(irradiance_transpositions.__project_dhi_to_panel_surface_perez_fast(time, dhi, dni,
                                                                                                        latitude,
                                                                                                        longitude, tilt,
                                                                                                        azimuth), 2)
+        irradiance_driesse = irradiance_driesse.values[0]
 
         irradiance_perez = round(
             irradiance_transpositions.__project_dhi_to_panel_surface_perez_fast(time, dhi, dni,
                                                                                 latitude, longitude, tilt, azimuth,
                                                                                 driesse=False), 2)
+        irradiance_perez = irradiance_perez.values[0]
 
         irradiance_isotropic = irradiance_transpositions.__project_dhi_to_panel_surface(dhi, tilt)
 
@@ -181,12 +191,13 @@ def test_dhi_transposition_random_panel_angles():
             "Transposed dhi was greater than dhi, this should never happen."
         )
 
-    print("Tested 300 random dhi transpositions with all random inputs. No faults found.")
+    print("Tested " + str(test_count) + " random dhi transpositions with all random inputs. No faults found.")
 
 def test_dni_transposition():
 
+    test_count = 300
 
-    for i in range(0, 300):
+    for i in range(0, test_count):
         time = datetime.datetime.now()
         dni = round(random.random() * 1000, 2)
 
@@ -206,6 +217,7 @@ def test_dni_transposition():
         aoi_limited = round(astronomical_calculations.get_solar_angle_of_incidence_limited(time,
                            latitude, longitude, tilt, azimuth), 2).values[0]
 
+        """
         print("=====")
         print("dni: " + str(dni) + "w")
         print("tilt: " + str(tilt) + "deg")
@@ -214,6 +226,7 @@ def test_dni_transposition():
         print("AOI: " + str(aoi) + "deg")
         print("AOI limited: " + str(aoi_limited) + "deg")
         print("=====")
+        """
 
 
         if aoi_limited == 90.0:
@@ -230,6 +243,6 @@ def test_dni_transposition():
 
         )
 
-    print("DNI transpositions did not have physical impossibilities.")
+    print("Tested " + str(test_count) + " random dni transpositions. No faults found.")
 
 
