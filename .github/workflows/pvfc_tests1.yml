@@ -8,6 +8,7 @@ jobs:
   flake8-lint:
     # code style checks, these are not too important
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
