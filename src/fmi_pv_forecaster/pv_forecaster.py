@@ -191,24 +191,6 @@ def set_cache(cache_on):
     meps_loader.cache_enabled = cache_on
 
 
-def set_timezone(timezone_string):
-    global timezone
-
-    all_viable_timezones = pytz.all_timezones_set
-
-    if timezone_string not in all_viable_timezones:
-        raise ValueError("Given timezone \""
-                         + str(timezone_string) + "\" is not in pytz.all_timezones. Timezone should"
-                          " be similar to \"Europe/Helsinki\", List of valid timezones can be found at "
-                          "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
-
-    timezone = timezone_string
-
-
-def get_timezone():
-    return timezone
-
-
 """
 Parameter set functions end
 Internal helpers begin

@@ -7,7 +7,6 @@ from .pv_forecaster import get_clearsky_estimate_for_interval
 from .pv_forecaster import get_default_fmi_forecast
 from .pv_forecaster import get_fmi_forecast_at_interpolated_time
 from .pv_forecaster import get_fmi_forecast_for_interval
-from .pv_forecaster import get_timezone
 from .pv_forecaster import get_default_clearsky_forecast
 from .pv_forecaster import get_fmi_radiation_forecast
 # external usage
@@ -24,15 +23,12 @@ from .pv_forecaster import set_location
 # optional system parameters
 from .pv_forecaster import set_module_elevation
 from .pv_forecaster import set_nominal_power_kw
-from .pv_forecaster import set_timezone
 
 __all__ = [
     # system parameters
     "set_angles",
     "set_location",
     "set_nominal_power_kw",
-    "set_timezone",
-    "get_timezone",
 
     # optional system parameters
     "set_module_elevation",
