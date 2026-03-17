@@ -11,7 +11,7 @@ import numpy
 import pandas
 import pandas as pd
 
-import default_parameters
+from . import default_parameters
 
 rated_power = 1 # kw rating
 
