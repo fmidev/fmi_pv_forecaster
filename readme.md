@@ -41,7 +41,31 @@ As of early 2026, the package is still in development phase. If you would like t
 `fmi_pv_forecast-0.1.0-py3-none-any.whl` from the dist/ folder and install it into your
 python environment. This can be done with the command
 `pip install --force-reinstall wheel fmi_pv_forecast-0.1.0-py3-none-any.whl`
-After package is installed, it can be imported as shown in the examples.
+After package is installed, it can be imported as shown in the examples. Running the install command also installs the 
+following dependencies:
+
+```commandline
+Package            Version
+------------------ ------------
+certifi            2026.2.25
+charset-normalizer 3.4.6
+defusedxml         0.7.1
+fmiopendata        0.5.0
+h5py               3.16.0
+idna               3.11
+numpy              2.4.3
+packaging          26.0
+pandas             3.0.1
+pip                25.1.1
+pvlib              0.15.0
+python-dateutil    2.9.0.post0
+pytz               2026.1.post1
+requests           2.32.5
+scipy              1.17.1
+six                1.17.0
+urllib3            2.6.3
+wheel              0.46.3
+```
 
 ---
 
