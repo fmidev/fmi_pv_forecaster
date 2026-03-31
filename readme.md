@@ -1,3 +1,4 @@
+This repository contains a more up to date and packaged version of the FMI PV forecasting code available at: https://github.com/fmidev/fmi-open-pv-forecast
 
 # FMI open pv forecast package
 
