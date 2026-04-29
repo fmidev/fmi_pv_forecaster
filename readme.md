@@ -1,8 +1,43 @@
-This repository contains a more up to date and packaged version of the FMI PV forecasting code available at: https://github.com/fmidev/fmi-open-pv-forecast
 
-This packaged version should be used in new projects instead of the older forecasting code.
+# FMI open pv forecast package - Custom build for shading research
 
-# FMI open pv forecast package
+**Build date: 29.04.2026**
+
+**NOTE:** Read the text here before using the package. Everything stated here overrides code comments and 
+texts in other readme files if there are conflicting statements.
+
+### Purpose
+This custom build was made for a research project by Haoyang Dong. It should be identical to the base version, but
+the function `pvfc.process_radiation_df(radiation_df)` now checks if the input dataframe contains values
+`dni_shading` or `dhi_shading`. If these values are detected, `dni_poa` and `dhi_poa` are set as:
+
+`dni_poa = dni_poa * (1-dni_shading)`
+
+`dhi_poa = dhi_poa * (1-dhi_shading)`
+
+This modification is necessary because perez
+driesse model estimates the uniformity of the sky based on DNI and DHI radiation values. When DNI shading is applied
+before DNI_poa is calculated, the model changes the uniformity of the sky. The model may for example think that the 
+weather is cloudy and the sky is an uniform emitter if DNI is too low, causing modeling errors.
+
+
+### Example
+See file `shading_testfile.py` for a quick example of how shading can be applied. The example only shows constant
+shading being applied, but shading can and should be variable.
+
+
+
+### Future of this branch
+This branch will be left as is to keep a historical record of how things were in that specific article.
+
+The shading feature might or might not become a part of the main PV model in the future. Shading capability is really
+nice to have, but the DNI and DHI shading values are difficult to come by, and we'd like to keep the main package as 
+simple as possible.
+
+
+
+
+## --- Custom build notes end ---
 
 The main functionality of this package is the PV forecasting tool which is a combination of the FMI PV model and
 weather forecasts from FMI open data. The resulting PV forecasting tool generates hourly weather-aware PV forecasts for
@@ -25,17 +60,17 @@ into the package.
 ## **Table of contents:**
 
 <!-- TOC -->
-
-* [Installing the package](#installing-the-package)
-* [FMI PV forecasts](#fmi-pv-forecasts)
+* [FMI open pv forecast package](#fmi-open-pv-forecast-package)
+  * [**Table of contents:**](#table-of-contents)
+  * [Installing the package](#installing-the-package)
+  * [FMI PV forecasts](#fmi-pv-forecasts)
     * [Forecast length and updating frequency](#forecast-length-and-updating-frequency)
     * [Geographic boundaries](#geographic-boundaries)
-* [Clear sky forecasts](#clear-sky-forecasts)
-* [Forecast accuracy](#forecast-accuracy)
+  * [Clear sky forecasts](#clear-sky-forecasts)
+  * [Forecast accuracy](#forecast-accuracy)
 * [Usage of external data instead of FMI open data](#usage-of-external-data-instead-of-fmi-open-data)
 * [Usage example](#usage-example)
-* [Authors and acknowledgements](#authors-and-acknowledgements)
-
+      * [Authors and acknowledgements](#authors-and-acknowledgements)
 <!-- TOC -->
 
 ## Installing the package
@@ -44,31 +79,7 @@ As of early 2026, the package is still in development phase. If you would like t
 `fmi_pv_forecast-0.1.0-py3-none-any.whl` from the dist/ folder and install it into your
 python environment. This can be done with the command
 `pip install --force-reinstall wheel fmi_pv_forecast-0.1.0-py3-none-any.whl`
-After package is installed, it can be imported as shown in the examples. Running the install command also installs the 
-following dependencies:
-
-```commandline
-Package            Version
------------------- ------------
-certifi            2026.2.25
-charset-normalizer 3.4.6
-defusedxml         0.7.1
-fmiopendata        0.5.0
-h5py               3.16.0
-idna               3.11
-numpy              2.4.3
-packaging          26.0
-pandas             3.0.1
-pip                25.1.1
-pvlib              0.15.0
-python-dateutil    2.9.0.post0
-pytz               2026.1.post1
-requests           2.32.5
-scipy              1.17.1
-six                1.17.0
-urllib3            2.6.3
-wheel              0.46.3
-```
+After package is installed, it can be imported as shown in the examples.
 
 ---
 
